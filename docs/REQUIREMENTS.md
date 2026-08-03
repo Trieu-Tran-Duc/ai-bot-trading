@@ -36,6 +36,42 @@ Out of Scope
 
 ---
 
+# Environment and Setup
+
+## Required configuration
+
+The implementation should support the following configuration inputs:
+- Binance REST and WebSocket endpoints
+- API and Telegram settings
+- Database connection settings
+- Logging and retry configuration
+- Symbol and interval configuration
+
+Configuration must be loaded from .env and never hardcoded.
+
+## Development workflow
+
+- Implement one phase at a time.
+- Keep changes scoped to the current milestone.
+- Reuse existing modules before introducing new abstractions.
+- Preserve the documented architecture and data rules.
+
+## Testing expectations
+
+- Unit tests should cover validators, normalizers, and repository behavior.
+- Integration tests should validate collector-to-persistence flow.
+- API and Telegram components should be tested for correct status and notification behavior.
+
+## Definition of done
+
+A phase is considered complete when:
+- the required functionality is implemented,
+- the change follows the documented architecture,
+- data integrity and immutability rules are preserved,
+- relevant documentation is updated if behavior changes.
+
+---
+
 # Data Sources
 
 REST

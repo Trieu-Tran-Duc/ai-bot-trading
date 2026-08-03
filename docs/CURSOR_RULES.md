@@ -15,8 +15,21 @@ This file is a short operational guide for Cursor and AI coding agents.
 - Do not create placeholder code or TODOs.
 - Keep code simple, readable, and production-ready.
 
+## Implementation workflow
+- Read the project rules and data docs before making changes.
+- Keep the current phase scoped and avoid speculative features.
+- Preserve existing patterns for collectors, services, repositories, and API layers.
+- Verify that the change respects immutability, async design, and configuration rules.
+
 ## Implementation priorities
 - Preserve immutability of raw market data.
 - Prefer async, typed, and testable code.
 - Use existing repository/service/collector patterns.
 - Keep configuration in .env and avoid hardcoded values.
+
+## Default implementation order
+- Understand the requirement and affected layer.
+- Follow the existing architecture boundaries.
+- Implement the minimal change needed for the current phase.
+- Add tests and update docs when behavior changes.
+- Confirm the change still respects data and logging rules.

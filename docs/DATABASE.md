@@ -348,6 +348,33 @@ Database models only represent stored data.
 
 ---
 
+# Repository and Write Contract
+
+The repository layer is the only layer that should access persistence directly.
+
+Responsibilities:
+- execute inserts and batch writes
+- enforce deduplication rules
+- manage transactions and write buffering
+- expose read operations for services and APIs
+
+The collector and pipeline layers must not write directly to the database.
+
+# Migration and Schema Evolution
+
+- Schema changes should be introduced through explicit migration steps.
+- Existing market data should remain append-only and backward-compatible.
+- New columns or tables should not break existing consumers without a documented migration plan.
+
+# Operational Notes
+
+- Use UTC timestamps consistently.
+- Keep indexes aligned with query patterns such as symbol and event_time.
+- Prefer bulk inserts and batched persistence for throughput.
+- Preserve raw payloads and metadata for auditability.
+
+---
+
 # Future Tables
 
 Reserved for future implementation.

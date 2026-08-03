@@ -49,3 +49,9 @@ Before implementing anything, read these files first:
 - Follow the existing architecture and layering
 - Keep changes minimal, readable, and production-ready
 - Avoid placeholders and TODOs unless explicitly requested
+
+## Implementation workflow
+- Read the relevant docs before editing code or architecture.
+- Start from existing modules and extend them in place when possible.
+- Keep changes scoped to the current phase and do not implement future features early.
+- Before finishing, verify that requirements, data rules, and layer boundaries are still satisfied.

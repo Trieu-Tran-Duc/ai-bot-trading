@@ -176,6 +176,43 @@ Normalize
 
 ---
 
+# Normalization Contract
+
+Every incoming Binance event should be normalized into a consistent internal record before persistence.
+
+Required fields:
+- event_time
+- symbol
+- source
+- received_at
+- created_at
+- raw_data
+
+Normalization rules:
+- Convert timestamps to UTC.
+- Preserve the original Binance event time as metadata when available.
+- Normalize symbol casing and value types where needed.
+- Retain the raw payload for traceability and replay.
+
+# Deduplication and Idempotency
+
+The collector and writer layers must prevent duplicate persistence.
+
+Rules:
+- Deduplicate before insert.
+- Use stable event identifiers where available.
+- Avoid overwriting existing raw market data.
+- Treat retries as idempotent operations.
+
+# Operational Requirements
+
+- Respect Binance rate limits and retry with backoff for transient errors.
+- Automatically reconnect and resubscribe for WebSocket streams.
+- Detect missing events and recover using REST when appropriate.
+- Keep all processing asynchronous and non-blocking where possible.
+
+---
+
 # Future Extensions
 
 Spot

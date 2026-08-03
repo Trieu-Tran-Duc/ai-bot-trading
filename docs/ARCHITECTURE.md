@@ -196,6 +196,21 @@ Collector
 Collector
 ✗ Database
 
+FastAPI
+↓
+Service
+↓
+Repository
+↓
+Database
+Collector
+↓
+Pipeline
+↓
+Writer
+↓
+Repository
+
 ---
 
 # Design Principles
@@ -208,6 +223,59 @@ Collector
 - Immutable Market Data
 - Configuration Driven
 - Production Ready
+
+---
+
+# Implementation Notes
+
+## Project structure expectations
+
+The implementation should follow the existing layers:
+- collectors for inbound data acquisition
+- pipeline components for validation and normalization
+- writer and repository layers for persistence
+- API and Telegram components for monitoring and notifications
+
+## Configuration and environment
+
+- Configuration must be loaded from environment variables via .env.
+- No secrets or runtime-specific values should be hardcoded.
+- All external services must be configurable and injectable.
+
+## Failure handling
+
+- Collector failures must not stop unrelated symbols or streams.
+- REST and WebSocket clients should implement retry and backoff behavior.
+- Errors must be logged with enough context for recovery and debugging.
+
+## Observability
+
+- Health checks should be available for collectors, database, and API layers.
+- Structured logs should be emitted for retries, validation failures, persistence events, and notifications.
+
+## Data contract
+
+All data entering the pipeline should be validated before persistence. The normalized payload should preserve the original Binance event time and raw payload while adding consistent metadata.
+
+## Coding standards
+
+- Keep modules focused on one responsibility.
+- Use explicit dependency injection for external integrations.
+- Prefer async, typed, and testable implementations.
+- Keep public interfaces simple and documented.
+
+## Error handling strategy
+
+- Handle failures at the boundary layer and convert them into structured errors.
+- Retry transient failures for collectors and external APIs.
+- Preserve partial state only when safe and explicitly supported.
+- Surface operational errors to monitoring and notification layers.
+
+## Logging specification
+
+- Emit structured logs for startup, shutdown, retries, validation errors, persistence success, and notification events.
+- Include component and correlation identifiers where possible.
+- Ensure logs are useful for debugging without exposing secrets.
 
 ---
 

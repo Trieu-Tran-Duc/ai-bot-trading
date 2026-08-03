@@ -32,3 +32,19 @@ Use this checklist before implementing or submitting changes.
 - [ ] Naming follows existing project conventions.
 - [ ] Files and modules remain consistent with the current structure.
 - [ ] Changes are minimal and production-ready.
+
+## Implementation workflow
+- [ ] Relevant documentation was reviewed before implementation.
+- [ ] The change stays within the current phase and scope.
+- [ ] The change does not introduce speculative or unrelated features.
+- [ ] The implementation is consistent with the documented architecture and data rules.
+
+## Review expectations
+- [ ] The change is understandable to the next contributor.
+- [ ] Important assumptions and constraints are documented.
+- [ ] Any new dependency or configuration is justified.
+
+## Implementation readiness
+- [ ] The change fits the current phase and scope.
+- [ ] The change can be implemented without introducing new architecture concepts.
+- [ ] The implementation remains consistent with the documented rules and boundaries.

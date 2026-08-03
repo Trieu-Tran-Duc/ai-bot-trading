@@ -43,7 +43,46 @@ Binance AI Data Collector is a Python async platform for collecting, validating,
 - API and Telegram: monitoring/notifications only; no direct Binance access
 - AI modules: read from the database only
 
+## Implementation workflow
+- Read the relevant project docs before implementing or reviewing changes.
+- Start from existing modules and keep changes scoped to the current task.
+- Do not introduce new architectural patterns unless the current design requires it.
+- Verify that the implementation preserves data immutability, boundary rules, and configuration conventions.
+
 ## Implementation expectations
 - Follow existing naming conventions and layering
 - Keep changes minimal, readable, and production-ready
 - Avoid placeholders and TODOs unless explicitly requested
+
+## Coding standards
+- Follow PEP 8 style and keep code readable.
+- Use type hints for public functions and methods.
+- Prefer small, focused functions and classes.
+- Avoid magic values; move constants to configuration.
+- Keep imports explicit and avoid wildcard imports.
+
+## Error handling strategy
+- Catch external exceptions at integration boundaries.
+- Retry transient REST failures with backoff.
+- Reconnect WebSocket clients automatically and resubscribe safely.
+- Log all failures with enough context for diagnosis and recovery.
+- Do not let one failed symbol or stream stop unrelated processing.
+
+## Logging specification
+- Use structured logging with consistent fields such as event, module, symbol, and status.
+- Never use print() for application logging.
+- Log retries, validation failures, persistence events, and notification delivery.
+- Avoid logging sensitive secrets or full credentials.
+
+## Delivery checklist
+- Requirements are covered by the current docs.
+- The change does not break the existing architecture.
+- The change remains consistent with data and persistence rules.
+- The change is documented where necessary for future implementation.
+
+## Implementation contract for contributors
+- Implement only the current phase requirements.
+- Keep changes small and targeted.
+- Prefer extending existing modules rather than introducing new abstractions.
+- Preserve existing interfaces unless the architecture explicitly requires a change.
+- If a requirement is ambiguous, follow the existing architecture and document the assumption.

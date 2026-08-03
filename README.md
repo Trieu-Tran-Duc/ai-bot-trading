@@ -79,6 +79,24 @@ To begin contributing:
 3. Follow the repository checklist in [docs/REPO_CONVENTION_CHECKLIST.md](docs/REPO_CONVENTION_CHECKLIST.md)
 4. Implement changes in small, focused steps
 
+## Implementation starter guide
+
+When implementing a feature or phase, follow this order:
+1. Read the relevant requirements and architecture docs.
+2. Identify the affected layer: collector, pipeline, writer, repository, service, API, or Telegram.
+3. Keep the change within the current phase and do not expand scope.
+4. Preserve immutability, async patterns, and configuration-driven behavior.
+5. Add or update tests and documentation before moving on.
+
+## Expected implementation layers
+
+The implementation should be organized around these layers:
+- collector layer for Binance REST and WebSocket integration
+- pipeline layer for validation and normalization
+- persistence layer for repository and writer responsibilities
+- service layer for orchestration and business rules
+- API and Telegram layers for monitoring and notifications
+
 ## Status
 
 This repository currently provides the project foundation, documentation, and conventions needed for implementation. The next steps are to build the core collectors, pipeline, database layer, and monitoring components.
