@@ -33,7 +33,6 @@ The system is designed to be modular, asynchronous, and easy to extend.
      ▼
  FastAPI
 ```
-
 ---
 
 # System Components
