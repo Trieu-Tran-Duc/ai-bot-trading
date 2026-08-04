@@ -1,57 +1,48 @@
-# AGENTS.md
+# AGENTS.md — AI Operating Rules
 
-# AGENTS.md
+## Read order (mỗi task)
 
-## Project context
-This repository is a Binance AI Data Collector project for collecting, validating, normalizing, and persisting immutable Binance market data.
+1. `docs/CONTEXT.md` → phase & priority hiện tại
+2. Doc liên quan task (SPEC / ARCHITECTURE / DATABASE / INTEGRATIONS)
+3. `docs/DECISIONS.md` nếu chạm stack hoặc kiến trúc
+4. `.cursor/rules/*.mdc`
 
-## Scope
-In scope:
-- Historical and real-time Binance data collection
-- Validation and normalization
-- Immutable raw-data persistence
-- Monitoring APIs and Telegram notifications
+**Không** đọc lại toàn bộ docs. **Không** suy đoán ngoài tài liệu.
 
-Out of scope:
-- Trading
-- Prediction or ML
-- Technical indicators
-- Strategy generation
-- Feature engineering
+## Phase 1 scope
 
-## Required reading
-Before implementing anything, read these files first:
-- docs/PROJECT_RULES.md
-- docs/BINANCE_DATA.md
-- docs/CURSOR_RULES.md
-- docs/REPO_CONVENTION_CHECKLIST.md
+Thu thập Binance (REST + WebSocket) → validate → normalize → PostgreSQL → Telegram + REST API quản lý.
 
-## Core rules
-- Python 3.13+
-- Prefer async I/O and type hints
-- Use SQLAlchemy ORM
-- Read configuration only from .env
-- Use structured logging; never use print()
-- Keep modules small and focused on one responsibility
-- Prefer editing existing modules over creating new ones
-- Do not change architecture unless absolutely necessary
-- Do not hardcode values that belong in configuration
-- Do not add unnecessary dependencies
+## Non-goals (Phase 1)
 
-## Data rules
-- Market data is immutable
-- Never update or delete raw market data
-- Store raw data before processing
-- Deduplicate before persistence
-- Normalize timestamps to UTC and preserve Binance event time
+Không implement: ML, prediction, TA indicators, trading, backtesting, dashboard AI.
 
-## Cursor guidance
-- Follow the existing architecture and layering
-- Keep changes minimal, readable, and production-ready
-- Avoid placeholders and TODOs unless explicitly requested
+## Module boundaries
 
-## Implementation workflow
-- Read the relevant docs before editing code or architecture.
-- Start from existing modules and extend them in place when possible.
-- Keep changes scoped to the current phase and do not implement future features early.
-- Before finishing, verify that requirements, data rules, and layer boundaries are still satisfied.
+```
+API → Service → Repository → DB
+Collector → Validator → Normalizer → Writer → Repository
+```
+
+- Collector/Validator/Normalizer **không** gọi DB trực tiếp
+- API **không** chứa business logic hay SQL
+- AI modules tương lai **chỉ** đọc PostgreSQL
+
+## Priority khi conflict
+
+1. User instruction
+2. `docs/DECISIONS.md`
+3. `docs/SPEC.md`
+4. `docs/ARCHITECTURE.md`
+5. `docs/DATABASE.md`
+6. `.cursor/rules/`
+
+## Sau mỗi task
+
+- Cập nhật `docs/CONTEXT.md` (phase, done, next)
+- Cập nhật doc nếu đổi schema/architecture
+- Minimal diff, không over-engineer
+
+## Commit
+
+Conventional: `feat:` `fix:` `docs:` `test:`
