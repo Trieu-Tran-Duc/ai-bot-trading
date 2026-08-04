@@ -1,350 +1,83 @@
-# Architecture
+# ARCHITECTURE
 
-## Overview
+**HOW** hệ thống được xây. Business → SPEC.md.
 
-Binance AI Data Collector is a lightweight, event-driven data platform.
+## Flow
 
-The system collects historical and real-time market data from Binance, validates and normalizes it, then persists immutable data for future AI training.
-
-The system is designed to be modular, asynchronous, and easy to extend.
-
----
-
-# High-Level Architecture
-
-```
-                    Binance
-
-          REST API + WebSocket
-                    │
-                    ▼
-              Data Collector
-                    │
-                    ▼
-               Data Pipeline
-                    │
-     ┌──────────────┴──────────────┐
-     ▼                             ▼
- Database Writer              Event Bus
-     │                             │
-     ▼                             ▼
- PostgreSQL                  Telegram
-     │
-     ▼
- FastAPI
+```text
+Binance (REST/WS) → Collector → Validator → Normalizer → Writer → Repository → PostgreSQL
+                                                                              ↓
+                                                                    Telegram / REST API
+Future AI ← chỉ đọc PostgreSQL
 ```
 
----
+## Components
 
-# System Components
+| Module | Responsibility | Không được |
+|--------|----------------|------------|
+| `collector/` | Lấy data Binance | validate, persist |
+| `validator/` | Schema + business validation | DB, API |
+| `normalizer/` | Binance → internal format | DB |
+| `writer/` | Batch insert, retry | Gọi Binance |
+| `repository/` | CRUD, queries | Business logic |
+| `api/` | HTTP endpoints (thin) | SQL, business rules |
+| `notification/` | Telegram alerts | Block collector |
+| `config/` | Pydantic Settings | Hardcode |
 
-## Collector
+Phase 1 queue: in-memory async (không Kafka/Celery).
 
-Responsibilities
+## Dependencies (chỉ flow xuống)
 
-- Connect to Binance REST API.
-- Connect to Binance WebSocket.
-- Receive market data.
-- Handle reconnect and recovery.
-- Push raw events into the pipeline.
-
-Collector must not:
-
-- Store data directly.
-- Calculate indicators.
-- Generate predictions.
-- Execute business logic.
-
----
-
-## Pipeline
-
-Responsibilities
-
-- Validate incoming messages.
-- Normalize Binance payloads.
-- Convert data into internal models.
-- Forward valid records to the database writer.
-
-Pipeline must remain stateless.
-
----
-
-## Database Writer
-
-Responsibilities
-
-- Receive normalized records.
-- Deduplicate data.
-- Persist data.
-- Batch writes when appropriate.
-
-Database Writer is the only component allowed to write to the database.
-
----
-
-## Database
-
-Responsibilities
-
-- Store immutable market data.
-- Store metadata.
-- Store system logs.
-
-Market data must never be modified after insertion.
-
----
-
-## Telegram
-
-Responsibilities
-
-- Receive system events.
-- Send notifications.
-- Execute administrative commands.
-
-Telegram must never access the database directly.
-
----
-
-## REST API
-
-Responsibilities
-
-- Provide health status.
-- Provide historical data.
-- Provide configuration information.
-
-REST API is read-only.
-
-REST API must never communicate directly with Binance.
-
----
-
-# Data Flow
-
-Realtime
-
-```
-Binance WebSocket
-        │
-Receive Event
-        │
-Validate
-        │
-Normalize
-        │
-Buffer
-        │
-Persist
-        │
-Notify
+```text
+api → service → repository → database
+collector → validator → normalizer → writer → repository
 ```
 
-Historical
+**Cấm:** collector→DB · api→DB · validator→repository
 
-```
-REST Request
-      │
-Download
-      │
-Validate
-      │
-Normalize
-      │
-Persist
-```
+## Folder layout
 
----
-
-# Dependency Rules
-
-```
-Collector
-        │
-        ▼
-Pipeline
-        │
-        ▼
-Database Writer
-        │
-        ▼
-Repository
-        │
-        ▼
-Database
+```text
+app/
+├── api/              # FastAPI routers
+├── collector/
+│   ├── historical/   # REST backfill
+│   └── realtime/     # WebSocket
+├── validator/
+├── normalizer/
+├── writer/
+├── repository/
+├── database/         # models, session
+├── schemas/          # Pydantic
+├── notification/
+├── config/
+├── logging/
+└── main.py
+tests/unit/ · tests/integration/
 ```
 
-Allowed dependencies
-Collector
-→ Pipeline
-Pipeline
-→ Database Writer
-Database Writer
-→ Repository
-Repository
-→ Database
-Forbidden
-REST API
-✗ Database Models
-REST API
-✗ Binance
-Telegram
-✗ Database
-Collector
-✗ Repository
-Collector
-✗ Database
+## Key flows
 
-FastAPI
-↓
-Service
-↓
-Repository
-↓
-Database
-Collector
-↓
-Pipeline
-↓
-Writer
-↓
-Repository
+**Realtime kline:** WS message → validate → normalize → persist **chỉ khi candle closed** (`k.x == true`)
 
----
+**Reconnect:** disconnect → backoff reconnect → REST backfill gap từ `MAX(open_time)`
 
-# Design Principles
+**Health (60s):** WS ok? · last kline fresh? · DB ping? → Telegram nếu fail
 
-- Single Responsibility Principle
-- Separation of Concerns
-- Dependency Injection
-- Async First
-- Event Driven
-- Immutable Market Data
-- Configuration Driven
-- Production Ready
+## Error strategy
 
----
+| Type | Action |
+|------|--------|
+| Recoverable (timeout, WS drop, 429) | Retry/reconnect + log |
+| Non-recoverable (bad config, schema) | Fail fast + Telegram |
 
-# Implementation Notes
+## Deploy (Phase 1)
 
-## Project structure expectations
+Docker Compose: FastAPI + PostgreSQL. Single host.
 
-The implementation should follow the existing layers:
-- collectors for inbound data acquisition
-- pipeline components for validation and normalization
-- writer and repository layers for persistence
-- API and Telegram components for monitoring and notifications
+## AI contract
 
-## Configuration and environment
+AI đọc qua: SQL query · export script (Parquet). Không endpoint data API bắt buộc v1.
 
-- Configuration must be loaded from environment variables via .env.
-- No secrets or runtime-specific values should be hardcoded.
-- All external services must be configurable and injectable.
-
-## Failure handling
-
-- Collector failures must not stop unrelated symbols or streams.
-- REST and WebSocket clients should implement retry and backoff behavior.
-- Errors must be logged with enough context for recovery and debugging.
-
-## Observability
-
-- Health checks should be available for collectors, database, and API layers.
-- Structured logs should be emitted for retries, validation failures, persistence events, and notifications.
-
-## Data contract
-
-All data entering the pipeline should be validated before persistence. The normalized payload should preserve the original Binance event time and raw payload while adding consistent metadata.
-
-## Coding standards
-
-- Keep modules focused on one responsibility.
-- Use explicit dependency injection for external integrations.
-- Prefer async, typed, and testable implementations.
-- Keep public interfaces simple and documented.
-
-## Error handling strategy
-
-- Handle failures at the boundary layer and convert them into structured errors.
-- Retry transient failures for collectors and external APIs.
-- Preserve partial state only when safe and explicitly supported.
-- Surface operational errors to monitoring and notification layers.
-
-## Logging specification
-
-- Emit structured logs for startup, shutdown, retries, validation errors, persistence success, and notification events.
-- Include component and correlation identifiers where possible.
-- Ensure logs are useful for debugging without exposing secrets.
-
----
-
-# Scalability
-
-The architecture must support:
-
-- Multiple symbols
-- Multiple intervals
-- Multiple WebSocket streams
-- Multiple REST collectors
-- Additional exchanges
-- Additional notification channels
-
-No architecture changes should be required to support these extensions.
-
----
-
-# Extension Points
-
-The following modules are designed for extension:
-
-Collector
-
-- Binance Spot
-- Binance Futures
-- Other Exchanges
-
-Notifier
-
-- Telegram
-- Discord
-- Slack
-
-Storage
-
-- PostgreSQL
-- TimescaleDB
-
-API
-
-- REST
-- WebSocket API
-
-Each extension must implement the existing interface without modifying the core architecture.
-
----
-
-# Non-Goals
-
-The architecture does not include:
-
-- Trading Engine
-- AI Engine
-- Machine Learning
-- Technical Indicators
-- Strategy Engine
-- Risk Management
-
-These components will be implemented as independent services in future phases.
-
----
-
-# Architecture Constraints
-
-- Market data is immutable.
-- Collector never writes directly to the database.
-- REST API never accesses Binance.
-- Database Writer is the only persistence layer.
-- All communication is asynchronous whenever possible.
-- Business logic must remain outside infrastructure components.
-- Every component must have a single responsibility.
+Chi tiết Binance/Telegram → [INTEGRATIONS.md](INTEGRATIONS.md)  
+Schema → [DATABASE.md](DATABASE.md)
