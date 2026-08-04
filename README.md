@@ -1,102 +1,42 @@
-# Binance AI Data Collector
+# AI Crypto Data Platform
 
-Binance AI Data Collector is a Python-based data platform for collecting, validating, normalizing, and persisting Binance market data for future analysis and AI-oriented use cases.
+AI-First platform thu thập dữ liệu Binance → PostgreSQL (SSOT) → phục vụ AI Training/Inference sau này.
 
-## Overview
+**Phase hiện tại:** AI Data Collector — chỉ Data Layer, không ML/trading.
 
-This project focuses on building a reliable, async-first pipeline for Binance market data with clear separation between collection, validation, persistence, and monitoring.
+## Doc map (đọc theo thứ tự)
 
-The system is designed around the following goals:
-- Collect historical and real-time Binance market data
-- Validate and normalize incoming payloads
-- Store immutable raw market data
-- Expose monitoring endpoints and notifications
-- Keep the architecture modular and production-oriented
+| File | Nội dung |
+|------|----------|
+| [AGENTS.md](AGENTS.md) | Quy tắc AI, thứ tự đọc |
+| [docs/CONTEXT.md](docs/CONTEXT.md) | **Trạng thái hiện tại** — đọc trước mỗi session |
+| [docs/SPEC.md](docs/SPEC.md) | WHAT: scope, FR, NFR, DoD |
+| [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) | HOW: components, flow, layout |
+| [docs/DATABASE.md](docs/DATABASE.md) | Schema, insert rules |
+| [docs/INTEGRATIONS.md](docs/INTEGRATIONS.md) | Binance + Telegram specs |
+| [docs/WORKFLOW.md](docs/WORKFLOW.md) | Phases + Cursor prompts |
+| [docs/DECISIONS.md](docs/DECISIONS.md) | ADR (không override) |
 
-## Scope
+## Quick start (sau khi implement)
 
-### In scope
-- Binance REST and WebSocket data collection
-- Data validation and normalization
-- Immutable raw-data persistence
-- Monitoring APIs and Telegram notifications
+```bash
+cp .env.example .env
+docker compose up -d
+alembic upgrade head
+uvicorn app.main:app --reload
+```
 
-### Out of scope
-- Trading
-- Prediction or ML models
-- Technical indicators
-- Strategy generation
-- Feature engineering
+## Stack (tóm tắt)
 
-## Architecture at a glance
+Python 3.13 · FastAPI · SQLAlchemy 2 async · PostgreSQL · Alembic · httpx · websockets · APScheduler · Telegram
 
-The repository is structured around a simple layered design:
-- Collector: acquires Binance data from REST and WebSocket sources
-- Pipeline: validates and normalizes payloads
-- Database writer / repository: persists data safely and efficiently
-- API / Telegram: exposes monitoring and notifications
+Chi tiết: `.cursor/rules/tech-stack.mdc`
 
-The design favors:
-- Async I/O
-- Type hints
-- SQLAlchemy ORM
-- Configuration through environment variables
-- Immutable raw market data
+## Roadmap (tham khảo)
 
-## Repository structure
-
-- docs/: project documentation, architecture, data rules, roadmap, and conventions
-- AGENTS.md: instructions for agents and AI coding tools
-- README.md: project overview and entry point
-
-## Documentation
-
-The project documentation is organized as follows:
-- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): system design and component boundaries
-- [docs/BINANCE_DATA.md](docs/BINANCE_DATA.md): Binance data sources and data rules
-- [docs/CURSOR_RULES.md](docs/CURSOR_RULES.md): short guidance for Cursor and AI coding agents
-- [docs/PROJECT_RULES.md](docs/PROJECT_RULES.md): canonical project rules
-- [docs/REPO_CONVENTION_CHECKLIST.md](docs/REPO_CONVENTION_CHECKLIST.md): implementation checklist for contributors
-- [docs/ROADMAP.md](docs/ROADMAP.md): phased implementation plan
-
-## Development principles
-
-The project follows these core rules:
-- Keep modules small and focused on one responsibility
-- Prefer editing existing modules over creating new ones
-- Use configuration from .env rather than hardcoding values
-- Use structured logging instead of print statements
-- Preserve the immutability of raw market data
-- Keep changes minimal, readable, and production-ready
-
-## Getting started
-
-The project is currently being organized around its documentation and architecture foundation. Implementation will follow the roadmap in [docs/ROADMAP.md](docs/ROADMAP.md).
-
-To begin contributing:
-1. Review the project rules in [docs/PROJECT_RULES.md](docs/PROJECT_RULES.md)
-2. Read the architecture overview in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-3. Follow the repository checklist in [docs/REPO_CONVENTION_CHECKLIST.md](docs/REPO_CONVENTION_CHECKLIST.md)
-4. Implement changes in small, focused steps
-
-## Implementation starter guide
-
-When implementing a feature or phase, follow this order:
-1. Read the relevant requirements and architecture docs.
-2. Identify the affected layer: collector, pipeline, writer, repository, service, API, or Telegram.
-3. Keep the change within the current phase and do not expand scope.
-4. Preserve immutability, async patterns, and configuration-driven behavior.
-5. Add or update tests and documentation before moving on.
-
-## Expected implementation layers
-
-The implementation should be organized around these layers:
-- collector layer for Binance REST and WebSocket integration
-- pipeline layer for validation and normalization
-- persistence layer for repository and writer responsibilities
-- service layer for orchestration and business rules
-- API and Telegram layers for monitoring and notifications
-
-## Status
-
-This repository currently provides the project foundation, documentation, and conventions needed for implementation. The next steps are to build the core collectors, pipeline, database layer, and monitoring components.
+| Phase | Nội dung |
+|-------|----------|
+| **1** | Data Collector ← **hiện tại** |
+| 2 | Feature Engineering, Dataset |
+| 3 | AI Training |
+| 4 | Inference, Signals |
