@@ -2,11 +2,12 @@
 
 > Cập nhật mỗi session. Cursor đọc **đầu tiên**.
 
-**Updated:** 2026-08-04 · **Phase:** 1 — AI Data Collector · **Status:** 🟡 Docs done, code chưa bắt đầu
+**Updated:** 2026-08-06 · **Phase:** 1 — AI Data Collector · **Status:** 🟡 Docs done, code chưa bắt đầu
 
 ## Done
 
-- [x] Bộ docs (SPEC, ARCHITECTURE, DATABASE, INTEGRATIONS, WORKFLOW, DECISIONS)
+- [x] Bộ docs Phase 1 (SPEC, ARCHITECTURE, DATABASE, INTEGRATIONS, WORKFLOW, DECISIONS)
+- [x] Bộ docs Phase 2 (INDEX, SPEC, ARCHITECTURE, DATABASE, INTEGRATIONS, **RUNTIME**)
 - [x] Cursor rules (tech-stack, coding-standard)
 
 ## Next (theo WORKFLOW.md)
@@ -37,6 +38,16 @@ Scaffold app/: pyproject.toml, config, logging, SQLAlchemy models, Alembic.
 Theo ARCHITECTURE.md layout. Không implement Binance yet.
 Cập nhật CONTEXT.md khi xong.
 ```
+
+## Phase 2 (planned — chưa implement)
+
+**Vision:** AI Research Platform — dự báo BTC, data luôn mới, Sheets sync realtime.  
+**Doc router:** `docs/PHASE2-INDEX.md` · **Runtime:** `docs/PHASE2-RUNTIME.md`
+
+| Status | Item |
+|--------|------|
+| 🟢 | Docs Phase 2 |
+| ⬜ | Code `app/ai/` |
 
 ## Constraints
 
