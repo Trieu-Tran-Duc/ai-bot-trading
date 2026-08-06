@@ -60,6 +60,7 @@ AI/ML · Prediction · TA indicators · Trading · Backtesting · Dashboard anal
 - [ ] 24h soak test stable
 - [ ] Không code ML/trading trong repo
 
-## Future phases (reference only)
+## Phase 2 (planned)
 
-2 Feature/Dataset · 3 Training · 4 Inference · 5 Signals
+AI Research Platform — prediction, benchmark, confidence, continuous learning.  
+→ [PHASE2-INDEX.md](PHASE2-INDEX.md) · [PHASE2-SPEC.md](PHASE2-SPEC.md)
