@@ -3,9 +3,11 @@
 ## Read order (mỗi task)
 
 1. `docs/CONTEXT.md` → phase & priority hiện tại
-2. Doc liên quan task (SPEC / ARCHITECTURE / DATABASE / INTEGRATIONS)
-3. `docs/DECISIONS.md` nếu chạm stack hoặc kiến trúc
-4. `.cursor/rules/*.mdc`
+2. **Phase 1:** SPEC / ARCHITECTURE / DATABASE / INTEGRATIONS (chọn file liên quan)
+3. **Phase 2:** `docs/PHASE2-INDEX.md` → @ thêm 1–2 file theo attach matrix  
+   - Jobs/train/predict/Sheets → **`PHASE2-RUNTIME.md`**
+4. `docs/DECISIONS.md` nếu chạm stack hoặc kiến trúc
+5. `.cursor/rules/*.mdc`
 
 **Không** đọc lại toàn bộ docs. **Không** suy đoán ngoài tài liệu.
 
@@ -13,9 +15,18 @@
 
 Thu thập Binance (REST + WebSocket) → validate → normalize → PostgreSQL → Telegram + REST API quản lý.
 
+## Phase 2 scope
+
+AI Research Platform: preparation → features → train → benchmark → predict → confidence → eval → retrain → Sheets.  
+Chi tiết runtime: `docs/PHASE2-RUNTIME.md`. Chỉ đọc PostgreSQL (ADR-005).
+
 ## Non-goals (Phase 1)
 
 Không implement: ML, prediction, TA indicators, trading, backtesting, dashboard AI.
+
+## Non-goals (Phase 2)
+
+Auto-trading · Binance access · Web dashboard UI
 
 ## Module boundaries
 
