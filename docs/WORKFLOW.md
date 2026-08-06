@@ -71,11 +71,71 @@ notification service: httpx, throttle, start/stop/error templates.
 
 | Thay đổi | File |
 |----------|------|
-| Schema | DATABASE.md |
-| Architecture | ARCHITECTURE.md |
-| API external | INTEGRATIONS.md |
+| Schema Phase 1 | DATABASE.md |
+| Schema Phase 2 | PHASE2-DATABASE.md |
+| Architecture Phase 2 | PHASE2-ARCHITECTURE.md |
+| Runtime / jobs / freshness | PHASE2-RUNTIME.md |
+| Architecture Phase 1 | ARCHITECTURE.md |
+| API external | INTEGRATIONS.md · PHASE2-INTEGRATIONS.md |
+| Phase 2 requirements | PHASE2-SPEC.md |
 | Status | CONTEXT.md |
 | Stack/ADR | DECISIONS.md |
+
+## Phase 2 — Implementation order
+
+**Prerequisite:** Phase 1 Done (1m klines realtime stable).
+
+| # | Task | Acceptance | @ docs |
+|---|------|------------|--------|
+| 1 | Scaffold `app/ai/` + config | Import OK | INDEX + ARCHITECTURE |
+| 2 | DB migration (incl. pipeline state) | `alembic upgrade head` | DATABASE + RUNTIME |
+| 3 | Incremental loader + watermark | New klines since watermark | **RUNTIME** |
+| 4 | data_ready + orchestrator | Cycle runs post candle close | **RUNTIME** |
+| 5 | Preparation + resample multi-TF | 5m/15m/1h/4h from 1m | SPEC + RUNTIME |
+| 6 | Feature engineering | No future leak tested | SPEC + ARCHITECTURE |
+| 7 | Training + walk-forward benchmark | ≥2 models, composite score | SPEC + RUNTIME |
+| 8 | Predict + confidence | Insert after candle close | SPEC + RUNTIME |
+| 9 | Evaluate job | Actual from klines | RUNTIME + DATABASE |
+| 10 | Sheets event sync | Lag < 10 min, incremental | INTEGRATIONS + RUNTIME |
+| 11 | Retrain job | Latest data + perf trigger | RUNTIME |
+| 12 | Telegram AI alerts | stale/sheets/retrain OK | INTEGRATIONS |
+
+## Phase 2 — Cursor prompt templates
+
+### Scaffold + pipeline state (bước 1–4)
+
+```
+@docs/PHASE2-RUNTIME.md @docs/PHASE2-DATABASE.md @docs/PHASE2-ARCHITECTURE.md
+
+Phase 2 bước 1–4: app/ai/, migration ai_pipeline_state, incremental loader, orchestrator.
+Post candle close cycle. Cập nhật CONTEXT.md.
+```
+
+### Feature + train (bước 5–7)
+
+```
+@docs/PHASE2-SPEC.md @docs/PHASE2-RUNTIME.md
+
+Resample 1m→multi-TF, features, walk-forward train XGBoost+LSTM.
+Composite score benchmark. dataset_end = latest kline.
+```
+
+### Predict + evaluate + Sheets (bước 8–10)
+
+```
+@docs/PHASE2-RUNTIME.md @docs/PHASE2-INTEGRATIONS.md @docs/PHASE2-DATABASE.md
+
+Predict + confidence + evaluate. Sheets event sync incremental.
+sheets_synced_at watermark. Không Binance.
+```
+
+### Retrain (bước 11)
+
+```
+@docs/PHASE2-RUNTIME.md @docs/PHASE2-SPEC.md
+
+Retrain job: cron + win rate trigger. Atomic is_active swap.
+```
 
 ## Anti-patterns
 
@@ -84,7 +144,9 @@ notification service: httpx, throttle, start/stop/error templates.
 | "Build trading bot" | "Data collector only" |
 | "Implement everything" | Một bước trong bảng trên |
 | Không @ docs | @ 2–3 files liên quan |
+| @ toàn bộ docs/ | @ PHASE2-INDEX + 1–2 file theo task |
+| Train trên Binance live | Đọc PostgreSQL only |
 
 ## Future phases (reference)
 
-2 Dataset · 3 Training · 4 Inference · 5 Signals — **ngoài scope**, chỉ ghi trong SPEC.
+Phase 2 = AI Research Platform (unified). Xem PHASE2-INDEX.md — không còn tách Phase 3/4/5 riêng.
