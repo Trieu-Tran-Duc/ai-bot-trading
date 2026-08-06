@@ -75,9 +75,15 @@ tests/unit/ · tests/integration/
 
 Docker Compose: FastAPI + PostgreSQL. Single host.
 
-## AI contract
+## AI contract (Phase 1)
 
 AI đọc qua: SQL query · export script (Parquet). Không endpoint data API bắt buộc v1.
 
+## Phase 2 — AI Research Platform
+
+Pipeline + modules → [PHASE2-ARCHITECTURE.md](PHASE2-ARCHITECTURE.md)  
+Runtime (jobs, freshness, Sheets trigger) → [PHASE2-RUNTIME.md](PHASE2-RUNTIME.md)  
+Router → [PHASE2-INDEX.md](PHASE2-INDEX.md)
+
 Chi tiết Binance/Telegram → [INTEGRATIONS.md](INTEGRATIONS.md)  
-Schema → [DATABASE.md](DATABASE.md)
+Schema → [DATABASE.md](DATABASE.md) · Phase 2 tables → [PHASE2-DATABASE.md](PHASE2-DATABASE.md)
