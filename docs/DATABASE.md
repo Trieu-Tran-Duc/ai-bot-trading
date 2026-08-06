@@ -106,3 +106,7 @@ Tables/columns: `snake_case`, plural tables · Index: `idx_{table}_{col}` · FK:
 | agg_trades | `AggTrade` | `app/database/models/agg_trade.py` |
 
 Schema change → migration + cập nhật file này.
+
+## Phase 2 tables
+
+Predictions, model registry, evaluations → [PHASE2-DATABASE.md](PHASE2-DATABASE.md)
